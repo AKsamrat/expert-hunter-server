@@ -38,7 +38,7 @@ app.use(cookieParser());
 
 async function run() {
   try {
-    // collections are here
+    //database collections are here
     const database = client.db('expertHunter');
     const jobsCollection = database.collection('jobs');
     const appliedCollection = database.collection('applied');

@@ -43,6 +43,12 @@ async function run() {
     const jobsCollection = database.collection('jobs');
     const appliedCollection = database.collection('applied');
 
+    //all jobs load
+    app.get('/allJobs', async (req, res) => {
+      const result = await jobsCollection.find().toArray();
+      res.send(result);
+    });
+
     //for myjobs data load-----------------------------------
 
     app.get('/myJobs/:email', async (req, res) => {
@@ -90,6 +96,13 @@ async function run() {
         },
       };
       const result = await jobsCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+
+    //apply job
+    app.post('/applyJob', async (req, res) => {
+      const jobData = req.body;
+      const result = await appliedCollection.insertOne(jobData);
       res.send(result);
     });
   } finally {

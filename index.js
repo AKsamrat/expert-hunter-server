@@ -120,6 +120,24 @@ async function run() {
       const result = await appliedCollection.insertOne(jobData);
       res.send(result);
     });
+
+    app.get('/appliedJobs/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = req.query.filter;
+      let query = { applicant_email: email };
+      if (filter) query.category = filter;
+      console.log(query);
+      const result = await appliedCollection.find(query).toArray();
+      res.send(result);
+    });
+    // app.get('/appliedJobs', async (req, res) => {
+    //   const filter = req.query.filter;
+
+    //   if (filter) query.category = filter;
+    //   console.log(query);
+    //   const result = await appliedCollection.find(query).toArray();
+    //   res.send(result);
+    // });
   } finally {
   }
 }

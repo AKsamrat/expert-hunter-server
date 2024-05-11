@@ -45,7 +45,11 @@ async function run() {
 
     //all jobs load
     app.get('/allJobs', async (req, res) => {
-      const result = await jobsCollection.find().toArray();
+      const search = req.query.search;
+      let query = {
+        job_title: { $regex: search, $options: 'i' },
+      };
+      const result = await jobsCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -102,6 +106,17 @@ async function run() {
     //apply job
     app.post('/applyJob', async (req, res) => {
       const jobData = req.body;
+      const query = {
+        applicant_email: jobData.applicant_email,
+        jobId: jobData.jobId,
+      };
+
+      const alreadyapplied = await appliedCollection.findOne(query);
+
+      console.log(alreadyapplied);
+      if (alreadyapplied) {
+        return res.status(400).send('You have already apply on this job');
+      }
       const result = await appliedCollection.insertOne(jobData);
       res.send(result);
     });

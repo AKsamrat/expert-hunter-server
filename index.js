@@ -185,14 +185,6 @@ async function run() {
       const result = await appliedCollection.find(query).toArray();
       res.send(result);
     });
-    // app.get('/appliedJobs', async (req, res) => {
-    //   const filter = req.query.filter;
-
-    //   if (filter) query.category = filter;
-    //   console.log(query);
-    //   const result = await appliedCollection.find(query).toArray();
-    //   res.send(result);
-    // });
   } finally {
   }
 }

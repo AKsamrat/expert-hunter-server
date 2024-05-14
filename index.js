@@ -1,11 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-require('dotenv').config();
 const config = process.env;
+const PORT = process.env.PORT || 5000;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.nj7eiar.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 console.log(uri);
 const client = new MongoClient(uri, {
@@ -25,7 +26,11 @@ client
     console.log(err.red);
   });
 const corsConfig = {
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'https://expert-hunter.web.app',
+    'https://aksamrat11thassignment.netlify.app',
+  ],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -194,7 +199,7 @@ async function run() {
 run().catch(console.dir);
 
 // Connection
-const PORT = process.env.PORT || 5000;
+
 app.get('/', (req, res) => {
   res.send('YOUR server is live');
 });

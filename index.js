@@ -1,30 +1,23 @@
-require('dotenv').config();
 const express = require('express');
-const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config();
 const config = process.env;
 const PORT = process.env.PORT || 5000;
+const app = express();
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.nj7eiar.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 console.log(uri);
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
 
-client
-  .connect()
-  .then(() => {
-    // console.log('MongoDB Connected'.blue.bold);
-  })
-  .catch(err => {
-    console.log(err.red);
-  });
+// client
+//   .connect()
+//   .then(() => {
+//     // console.log('MongoDB Connected'.blue.bold);
+//   })
+//   .catch(err => {
+//     console.log(err.red);
+//   });
 const corsConfig = {
   origin: [
     'http://localhost:5173',
@@ -56,6 +49,13 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 async function run() {
   try {
     //database collections are here
@@ -82,13 +82,37 @@ async function run() {
       res.clearCookie('token', { maxAge: 0 }).send({ success: true });
     });
 
+    //pagination----------------------
+
+    // app.get('/jobpagination', async (req, res) => {
+    //   const page = parseInt(req.query.page);
+    //   const size = parseInt(req.query.size);
+    //   console.log(req.query);
+    //   const result = await jobsCollection
+    //     .find()
+    //     .skip(page * size)
+    //     .limit(size)
+    //     .toArray();
+    //   res.send(result);
+    // });
+    app.get('/jobsCount', async (req, res) => {
+      const count = await jobsCollection.estimatedDocumentCount();
+      res.send({ count });
+    });
+
     //all jobs load
     app.get('/allJobs', async (req, res) => {
+      const size = parseInt(req.query.size);
+      const page = parseInt(req.query.page);
       const search = req.query.search;
       let query = {
         job_title: { $regex: search, $options: 'i' },
       };
-      const result = await jobsCollection.find(query).toArray();
+      const result = await jobsCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
     app.get('/allJob', async (req, res) => {

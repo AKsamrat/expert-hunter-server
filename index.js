@@ -21,8 +21,9 @@ console.log(uri);
 const corsConfig = {
   origin: [
     'http://localhost:5173',
+    'http://localhost:5174',
     'https://expert-hunter.web.app',
-    'https://aksamrat11thassignment.netlify.app',
+    // 'https://aksamrat11thassignment.netlify.app',
   ],
   credentials: true,
   optionSuccessStatus: 200,
@@ -71,7 +72,7 @@ async function run() {
       res
         .cookie('token', token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production' ? 'true' : 'false',
+          secure: process.env.NODE_ENV === 'production',
           sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         })
         .send({ success: true });
@@ -84,17 +85,6 @@ async function run() {
 
     //pagination----------------------
 
-    // app.get('/jobpagination', async (req, res) => {
-    //   const page = parseInt(req.query.page);
-    //   const size = parseInt(req.query.size);
-    //   console.log(req.query);
-    //   const result = await jobsCollection
-    //     .find()
-    //     .skip(page * size)
-    //     .limit(size)
-    //     .toArray();
-    //   res.send(result);
-    // });
     app.get('/jobsCount', async (req, res) => {
       const count = await jobsCollection.estimatedDocumentCount();
       res.send({ count });
@@ -150,7 +140,7 @@ async function run() {
       res.send(result);
     });
     //for update jobs
-    app.get('/job/:id', verifyToken, async (req, res) => {
+    app.get('/job/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.findOne(query);
@@ -200,12 +190,28 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/appliedJobs/:email', async (req, res) => {
+    app.get('/appliedJobs/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
+      const tokenEmail = req.user.email;
+      console.log(email);
+      console.log(tokenEmail);
+      if (tokenEmail !== email) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
       const filter = req.query.filter;
       let query = { applicant_email: email };
       if (filter) query.category = filter;
       console.log(query);
+      const result = await appliedCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //for applied user data load
+    app.get('/appliedUsers/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        jobId: id,
+      };
       const result = await appliedCollection.find(query).toArray();
       res.send(result);
     });
